@@ -1,0 +1,51 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+
+	<!-- creates a java.util.Map instance with the supplied key-value pairs -->
+	<util:map id="consumerProps">
+		<entry key="bootstrap.servers" value="localhost:9092" />
+		<entry key="group.id" value="defaultgroup" />
+		<entry key="enable.auto.commit" value="true" />
+		<entry key="auto.commit.interval.ms" value="100" />
+		<entry key="session.timeout.ms" value="15000" />
+		<entry key="key.deserializer"
+			value="org.apache.kafka.common.serialization.IntegerDeserializer" />
+		<entry key="value.deserializer"
+			value="org.apache.kafka.common.serialization.StringDeserializer" />
+
+	</util:map>
+
+	<bean id="customMessageListener" class="net.mikeharris.example.kafka.CustomMessageListener" />
+
+	<!-- The KafkaMessageListenerContainer allows us to consume messages from 
+		Kafka topics in a single thread while the ConcurrentMessageListenerContainer 
+		allows us to consume messages in multi-threaded style. -->
+	<bean id="container"
+		class="org.springframework.kafka.listener.KafkaMessageListenerContainer">
+		<constructor-arg>
+			<bean class="org.springframework.kafka.core.DefaultKafkaConsumerFactory">
+				<constructor-arg>
+
+					<ref bean="consumerProps" />
+
+				</constructor-arg>
+
+			</bean>
+		</constructor-arg>
+		<constructor-arg>
+			<bean class="org.springframework.kafka.listener.config.ContainerProperties">
+				<constructor-arg name="topics" value="topic1" />
+				<property name="messageListener" ref="customMessageListener"></property>
+			</bean>
+		</constructor-arg>
+	</bean>
+
+
+</beans>
